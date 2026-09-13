@@ -1,0 +1,76 @@
+# EditorConfig — https://editorconfig.org
+# Conventions per CLAUDE.md: PascalCase types/members, _camelCase private
+# fields, UPPER_SNAKE_CASE constants. Severity = suggestion so IDEs flag
+# violations; hard enforcement is the test/format gate, not the IDE.
+
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# C#
+[*.cs]
+end_of_line = crlf
+
+# var only where the type is obvious from the right-hand side
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+csharp_style_namespace_declarations = block_scoped:suggestion
+
+# Naming — constants first (first matching rule wins, so const fields are
+# not captured by the private-field rule below)
+dotnet_naming_rule.constants_upper_snake.symbols = constants
+dotnet_naming_rule.constants_upper_snake.style = upper_snake_style
+dotnet_naming_rule.constants_upper_snake.severity = suggestion
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_style.upper_snake_style.capitalization = all_upper
+dotnet_naming_style.upper_snake_style.word_separator = _
+
+# Naming — types, methods, properties, events: PascalCase
+dotnet_naming_rule.types_and_members_pascal_case.symbols = types_and_members
+dotnet_naming_rule.types_and_members_pascal_case.style = pascal_case_style
+dotnet_naming_rule.types_and_members_pascal_case.severity = suggestion
+
+dotnet_naming_symbols.types_and_members.applicable_kinds = class,struct,interface,enum,method,property,event
+dotnet_naming_symbols.types_and_members.applicable_accessibilities = *
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Naming — private fields: _camelCase (CLAUDE.md)
+dotnet_naming_rule.private_fields_underscore_camel.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore_camel.style = underscore_camel_style
+dotnet_naming_rule.private_fields_underscore_camel.severity = suggestion
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.underscore_camel_style.required_prefix = _
+dotnet_naming_style.underscore_camel_style.capitalization = camel_case
+
+# Naming — parameters and locals: camelCase
+dotnet_naming_rule.parameters_camel_case.symbols = parameters
+dotnet_naming_rule.parameters_camel_case.style = camel_case_style
+dotnet_naming_rule.parameters_camel_case.severity = suggestion
+
+dotnet_naming_symbols.parameters.applicable_kinds = parameter
+
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+# JSON / asmdef
+[*.{json,asmdef}]
+indent_size = 2
+
+# Markdown: trailing whitespace can be significant (line breaks)
+[*.md]
+trim_trailing_whitespace = false
+
+# Unity YAML is managed by Unity and normalized by .gitattributes —
+# no formatting rules here on purpose.
+[*.{unity,asset,prefab,meta}]
