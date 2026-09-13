@@ -1,0 +1,109 @@
+# Software Architecture Documentation (arc42)
+
+Status: initial skeleton, pre-implementation. Update this document as part of every architecturally relevant change (see `CLAUDE.md`).
+
+---
+
+## 1. Introduction and Goals
+
+Historical economic sandbox game, Iceland Settlement Period (Landnám, c. 874–930 CE). Full design rationale: `docs/concept/`.
+
+**Quality goals (draft — refine once implementation starts):**
+- Maintainability: data-driven balancing (skills, prices, origins) editable without code changes
+- Performance: NPC economy simulation must scale to many farms without frame-rate impact
+- Extensibility: new skills/goods/buildings addable via data assets, not code changes
+
+**Stakeholders:** Henrik (solo developer / designer)
+
+## 2. Constraints
+
+| Constraint | Decision | Rationale |
+|---|---|---|
+| Engine | Unity (C#) | Tooling maturity, team language fit |
+| Rendering | 3D terrain mesh + orthographic camera at isometric angle | Avoids tiling seams on irregular real coastline data; see concept doc 12 |
+| Terrain data | ÍslandsDEM v1.0 (Landmælingar Íslands, CC BY 4.0) | Highest-quality free elevation data specific to Iceland |
+| Audio middleware | FMOD or Wwise (final choice open) | Adaptive/interactive music, superior to raw MIDI playback |
+| Team size | Solo development | Affects scope decisions, favors simpler systems where quality-neutral |
+| Development process | Trunk-based, single main branch, commit only after explicit approval | See `CLAUDE.md` |
+| Implementation workflow | Fully agentic (LLM-generated code/assets); user approves commits and decides design questions | See `docs/ROADMAP.md`; scene/prefab/SO assets are only created via editor scripts in batchmode, never by hand-editing YAML |
+| Tooling environment | Windows 11, Windows PowerShell 5.1 only (no pwsh 7), Python 3.14 + rasterio/numpy for terrain tooling | All local scripts must target these runtimes |
+| Legacy migration source | `E:\projects\game\oerfi` (predecessor project, Unity 6000.5.9f1, 13 commits) | Adopted module-by-module during M2–M5; deleted only after M1 transfer completes |
+
+## 3. Context and Scope
+
+Single-player, no online services, no external system integrations. To be detailed once the first external interfaces (if any — e.g., save file format, mod support) are defined.
+
+## 4. Solution Strategy
+
+- **Two-tier economy simulation:** detailed agent simulation for farms near the player, abstracted tick-based calculation for distant farms (concept doc 4.1)
+- **Data-driven balancing:** ScriptableObjects for skills (11.6), origins (11.1), price tables (14.6), calendar (7) — balancing changes should not require code changes or recompilation
+- **Emergent state over scripted events:** mortality/health driven by a continuous Vitality resource affected by supply, cold, and disease, not isolated random-roll death checks (concept doc 11.5)
+- **Task assignment over direct control:** workers (thralls, free household members) are assigned roles and execute autonomously; the player manages priorities, not individual actions (concept doc 4.5/10)
+- **Hidden internal state, qualitative UI:** morale/discontent values are computed exactly internally but never surfaced as exact numbers to the player (concept doc 4.5/10)
+
+## 5. Building Block View
+
+Assembly layout (since M0):
+
+| Assembly | Location | Purpose |
+|---|---|---|
+| `Oerfi.Runtime` | `Assets/Scripts/` | Game code (subfolders per module: Economy, Characters, Buildings, Weather, AI as they are implemented) |
+| `Oerfi.Editor` | `Assets/Scripts/Editor/` | Editor tooling: SO/scene generators, batchmode entry points (`-executeMethod`) |
+| `Oerfi.Tests.EditMode` | `Assets/Tests/EditMode/` | Pure-logic tests (editor context) |
+| `Oerfi.Tests.PlayMode` | `Assets/Tests/PlayMode/` | Runtime integration tests (headless-safe, no rendering assumptions) |
+
+Non-asset directories outside `Assets/`: `scripts/` (verification gate), `tools/` (terrain/asset pipeline scripts), `terrain-cache/` (gitignored DEM source tiles, planned M1).
+
+Anticipated top-level runtime modules (see `CLAUDE.md` directory structure): Economy, Characters, Buildings, Weather, AI (task assignment).
+
+## 6. Runtime View
+
+*To be filled in as key scenarios are implemented — e.g., seasonal tick processing, task assignment resolution, trade ship arrival/departure, mortality resolution.*
+
+## 7. Deployment View
+
+Target platform(s): TBD (PC assumed). Build pipeline: TBD.
+
+## 8. Cross-Cutting Concepts
+
+- **Data-driven configuration:** all balancing values (skills, prices, calendar, origins) live in ScriptableObject assets, not hardcoded
+- **Two-tier simulation detail:** near/far distinction for economy agents (performance concern)
+- **Hidden-state UI principle:** discontent/morale never shown as an exact number or bar — only qualitative, behavior-based signals with intentionally fuzzy thresholds (concept doc 4.5/10)
+- **Asset generation via editor scripts:** scenes, prefabs, and SO assets are created by `Oerfi.Editor` code run through Unity batchmode (`-executeMethod`); `.unity`/`.prefab` YAML is never hand-edited
+- **Local verification gate:** `scripts/run-tests.ps1` runs Unity batchmode tests (EditMode always; PlayMode when runtime-relevant) and parses the results XML; this is the pre-commit gate until CI exists (CLAUDE.md)
+
+## 9. Architecture Decisions
+
+Full ADRs live under `docs/architecture/decisions/`. Summary of decisions made so far:
+
+| ID | Decision | Status |
+|---|---|---|
+| ADR-001 | Unity (C#) as engine | Accepted |
+| ADR-002 | 3D terrain + orthographic camera instead of 2D tile-based isometric | Accepted |
+| ADR-003 | Trunk-based development, commit only after explicit user approval | Accepted |
+| ADR-004 | ScriptableObjects for all balancing data | Accepted |
+
+## 10. Quality Requirements
+
+*Quality tree to be developed once first systems exist.*
+
+## 11. Risks and Technical Debt
+
+| Risk | Mitigation |
+|---|---|
+| "Chore simulator" feel (busywork instead of meaningful decisions) | Task-assignment automation, aggregate stock tracking instead of per-item micromanagement (concept doc 4.5/10) |
+| Agent-based economy simulation performance at scale | Two-tier detail model (near/far) |
+| Balancing drift between concept doc and implementation | arc42 + concept doc kept explicitly separate; price/skill tables sourced from concept doc sections 11.6/14.6 as single source of truth for initial values |
+| Migrated legacy code (predecessor project) may not meet current conventions/tests | Module-by-module adoption in M2–M4 with ported tests required green in the new gate before each module counts as migrated |
+
+Technical debt: none recorded yet beyond the migration risk above (M0 just established the baseline).
+
+## 12. Glossary
+
+| Term | Meaning |
+|---|---|
+| Kúgildi | Historical Icelandic value unit ("cow-value"), used as internal pricing baseline — concept doc 14.1 |
+| Vaðmál | Homespun wool cloth, historically also used as currency — concept doc 4.2 |
+| Þræll (pl. Þrælar) | Historical term for an unfree laborer (thrall) — concept doc 4.5 |
+| Hreppur | Historical local community association — concept doc 2 |
+| Vitality | Internal health resource driving emergent mortality — concept doc 11.5 |
