@@ -1,0 +1,49 @@
+{
+  "region": "southwest",
+  "requested_center_latlon": [
+    64.256,
+    -21.13
+  ],
+  "source": "Copernicus DEM GLO-30 (see ADR-005 for credit lines)",
+  "source_tiles": [
+    "Copernicus_DSM_COG_10_N63_00_W020_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N63_00_W021_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N63_00_W022_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N63_00_W023_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N64_00_W020_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N64_00_W021_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N64_00_W022_00_DEM.tif",
+    "Copernicus_DSM_COG_10_N64_00_W023_00_DEM.tif"
+  ],
+  "target_crs": "EPSG:3057 (ISN93 / Lambert 1993)",
+  "resolution_m": 50,
+  "size": [
+    2049,
+    2049
+  ],
+  "extent_m": [
+    102450,
+    102450
+  ],
+  "center_3057": [
+    396752.3879290862,
+    418808.7515915164
+  ],
+  "bounds_3057": [
+    345527.3879290862,
+    367583.7515915164,
+    447977.3879290862,
+    470033.7515915164
+  ],
+  "scale_factor": 10,
+  "offset": 10000,
+  "nodata_value": 0,
+  "sea_level_raw": 10000,
+  "height_range_m": [
+    0.0,
+    1406.8
+  ],
+  "sea_fraction": 0.11045919625114418,
+  "format": "UInt16 little-endian RAW (canonical) / 16-bit PNG (inspection)",
+  "encoding": "raw = clip(height_m * 10 + 10000, 0, 65535); 10000 = sea level; ocean areas arrive as 0.0 m elevation and encode to 10000"
+}
