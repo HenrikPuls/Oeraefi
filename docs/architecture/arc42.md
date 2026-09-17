@@ -52,7 +52,9 @@ Assembly layout (since M0):
 | `Oerfi.Tests.EditMode` | `Assets/Tests/EditMode/` | Pure-logic tests (editor context) |
 | `Oerfi.Tests.PlayMode` | `Assets/Tests/PlayMode/` | Runtime integration tests (headless-safe, no rendering assumptions) |
 
-Non-asset directories outside `Assets/`: `scripts/` (verification gate), `tools/` (terrain/asset pipeline scripts), `terrain-cache/` (gitignored DEM source tiles, planned M1).
+Non-asset directories outside `Assets/`: `scripts/` (verification gate), `tools/terrain/` (scripted DEM pipeline: fetch → process, ADR-005), `terrain-cache/` (gitignored DEM source tiles + temp), `docs/archive/` (predecessor project history bundle).
+
+Terrain data path: `Assets/StreamingAssets/Terrain/` holds the processed heightmap (canonical: UInt16 little-endian RAW; encoding `raw = clip(height_m × 10 + 10000)`, 0 = sea) plus metadata JSON — git-LFS tracked (`*.raw`, `*.png`). See ADR-005 and `docs/pipeline/terrain-import.md`.
 
 Anticipated top-level runtime modules (see `CLAUDE.md` directory structure): Economy, Characters, Buildings, Weather, AI (task assignment).
 

@@ -2,19 +2,19 @@
 
 Updated at the end of each session (or before a significant pause). Keep short — running note, not a log.
 
-## State (2026-09-13, M0 session)
+## State (2026-09-18, M1 session — committed)
 
-- **M0 complete (pending user commit approval):** verification gate `scripts/run-tests.ps1` (EditMode/PlayMode batchmode), assembly structure (`Oerfi.Runtime`, `Oerfi.Editor`, `Oerfi.Tests.EditMode/PlayMode`), smoke tests green, `.editorconfig`, `docs/ROADMAP.md`, arc42 updates, ADR-001..004 backfilled.
-- Old predecessor project at `E:\projects\game\oerfi` still exists — holds the migrated-from codebase (13 commits, Phase A–C), 44 GLO-30 DEM tiles, processed 2049² heightmap + metadata, and its git history.
+- **M0 committed** (`b55d7f1`, `29108ff`, `f56c9dd`): verification gate, assembly structure, smoke tests, docs baseline.
+- **M1 committed:** scripted DEM pipeline `tools/terrain/` (fetch_tiles.py / process_dem.py, parameterized, ADR-005); legacy GDAL scripts deleted; 44 GLO-30 tiles in gitignored `terrain-cache/` (411 MB); playable region `southwest` (~102×102 km, center Þingvellir/Faxaflói) in `Assets/StreamingAssets/Terrain/` via git-LFS (RAW exact size, max 1406.8 m, 11% sea — Faxaflói + Langjökull verified); old history archived as binary-stripped bundle `docs/archive/predecessor-history.bundle` (13 commits, 163 KB, probe-clone verified). EditMode gate green (2/2, exit 0, no warnings), Unity import verified (all metas, no warnings).
 
 ## Intentionally deferred / open threads
 
-- **Do not delete `E:\projects\game\oerfi` until M1 is done** (heightmap, tiles, and git-bundle archive must be transferred first).
-- No git remote configured — push impossible; LFS-capability of any future remote unverified (`.gitattributes` routes binary types to LFS).
-- Optional package diet not decided: `com.unity.ai.assistant`, `com.unity.ai.inference`, `com.unity.visualscripting`, storytelling/worldbuilding feature packages could be removed to speed up batchmode runs.
-- `dotnet format` works with `Oerfi.slnx`/Unity-generated csproj. Formatting gate is scoped to the `Oerfi.*.csproj` assemblies; `Assembly-CSharp.csproj` (contains the intentionally-kept `TutorialInfo/` template scripts) is excluded — it would fail CHARSET checks on kept files.
-- `TutorialInfo/` + `Readme.asset` intentionally kept (user decision); stray `New Scene.unity` deleted (GUID-checked unreferenced before deletion).
+- **Predecessor dir `E:\projects\game\oerfi` may be deleted now** — everything valuable is transferred (tiles in terrain-cache, history in bundle, region heightmap in repo).
+- Uncommitted editor-session resaves (`Assets/Settings/DefaultVolumeProfile.asset`, `ProjectSettings/ProjectSettings.asset`) deliberately excluded from M1 commits — decide: separate chore commit or discard.
+- No git remote configured — push impossible; remote must be LFS-capable (heightmaps now depend on LFS).
+- Optional package diet still undecided (`ai.assistant`, `visualscripting`, …).
+- M2 next: migrate Core + Economy modules (CalendarService, Goods, PricingEngine, FarmEconomyAgent) cleaned to Oerfi.* conventions; port EditMode tests.
 
 ## Next step
 
-Start **M1 (Data & Archive Migration)** in a fresh plan-mode session: LFS import of heightmap+metadata, tiles → `terrain-cache/`, old history → `docs/archive/*.bundle`, rework `tools/` DEM scripts to parameterized paths, English rewrite of `docs/pipeline/terrain-import.md`, ADR-005.
+Start **M2 (Core + Economy migration)** in a fresh plan-mode session.

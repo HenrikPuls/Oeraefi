@@ -10,15 +10,14 @@ Working doc that orders implementation into milestones. Each milestone is sized 
 
 Local verification gate `scripts/run-tests.ps1` (Unity batchmode EditMode/PlayMode, results XML parsing, lock check), assembly structure (`Oerfi.Runtime`, `Oerfi.Editor`, test asmdefs), smoke tests, `.editorconfig`, docs scaffolding.
 
-## M1 — Data & Archive Migration
+## M1 — Data & Archive Migration (done)
 
-Transfer the valuable state of the abandoned predecessor project at `E:\projects\game\oerfi` (13 commits, Unity 6000.5.9f1) before that directory gets deleted:
+Predecessor project data transferred before deletion of `E:\projects\game\oerfi`:
 
-- Copy the processed heightmap (`iceland_heightmap_50m_2049x2049.png`/`.raw` + metadata JSON) into the repo via git-LFS; the 44 Copernicus GLO-30 source tiles (411 MB) move to a gitignored local cache `terrain-cache/`; intermediate mosaic/warped products (~550 MB) are discarded (regenerable from tiles).
-- Adopt `download_iceland_dem.py`; rework `tools/process_iceland_dem*.py` to parameterized paths (region selectable), keep Copernicus GLO-30 as current source (ÍslandsDEM 10 m as later quality upgrade — **ADR-005 terrain pipeline**).
-- Archive the old git history as a bundle under `docs/archive/`.
-- Rework `docs/pipeline/terrain-import.md` into English, matching the new layout.
-- **Do not delete the old directory until this milestone is complete.**
+- Scripted pipeline `tools/terrain/` (`fetch_tiles.py`, `process_dem.py`) — parameterized region/size/resolution, EPSG:3057, 2ⁿ+1, UInt16 RAW + metadata JSON (**ADR-005**)
+- 44 GLO-30 source tiles in gitignored `terrain-cache/`; old project's git history archived as a binary-stripped bundle at `docs/archive/predecessor-history.bundle` (13 commits, ~163 KB)
+- New playable region `southwest` (~102×102 km around Þingvellir/Faxaflói) processed into `Assets/StreamingAssets/Terrain/` via git-LFS (`*.raw` pattern added)
+- `docs/pipeline/terrain-import.md` rewritten in English
 
 ## M2 — Core + Economy (migrated & cleaned)
 

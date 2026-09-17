@@ -1,101 +1,63 @@
-# Terrain-Import-Pipeline: DEM → Unity (manuelle QGIS-Vorbereitung)
+# Terrain Pipeline: DEM → Unity Heightmap
 
-Diese Anleitung beschreibt den **manuellen Schritt außerhalb von Unity**:
-Vorbereitung der Höhendaten in QGIS und Export als Heightmap, die der
-`HeightmapImporter` (Unity Editor-Tool) anschließend einliest.
+Scripted pipeline that turns public Copernicus GLO-30 elevation tiles into the heightmap consumed by the Unity `HeightmapImporter` (built in milestone M4). No QGIS or manual GIS steps required. See **ADR-005** for the decision record and credit lines.
 
-## Datenquelle
-
-- **ÍslandsDEM v1.0** — Höhenmodell, 10 m Auflösung (stellenweise 2 m)
-- Herausgeber: Landmælingar Íslands + PGC, Lizenz **CC-BY-4.0**
-- Download/Ansicht: <https://dem.lmi.is/mapview/> bzw.
-  <https://www.lmi.is/is/thaettir-um-land/fyrirtaekid/gagnasofn/islandsdem>
-
-Lizenzhinweis: CC-BY-4.0 verlangt Namensnennung — im Spiel-Credits
-"Kartendaten: Landmælingar Íslands (ÍslandsDEM v1.0), CC BY 4.0" aufnehmen.
-
-## Schritt 1: Region zuschneiden
-
-1. QGIS öffnen (getestet mit QGIS 3.x LTR), ÍslandsDEM als Raster-Layer laden.
-2. Zielregion festlegen. Empfohlene Eingrenzung (dichte Landnahme-Saga-
-   Geografie statt ganz Island), z. B. Südwesten:
-   - Faxaflói/Reykjavík, Þingvellir, optional bis Hjörleifshöfði/
-     Vestmannaeyjar
-3. Zuschnitt über *Raster → Extraktion → Raster nach Rechteck zuschneiden*
-   (oder Temporärer Ausschnitt-Layer + *Exportieren → Aktuelle Ausdehnung*).
-
-**Größenrichtwert:** Zielauflösung im Spiel ist ein 50-m-Raster
-(`TerrainResourceLayer`, Grid-Auflösung konfigurierbar). Eine Region von
-50 × 50 km ergibt bei 50 m Auflösung 1000 × 1000 Zellen — eine sinnvolle
-Obergrenze für Unity-Terrain (Unity-Terrain erlaubt max. 4097 × 4097
-Heightmap-Auflösung, ist aber ab ~2000² pro Tile handhabbar).
-
-## Schritt 2: Reprojizieren/Downsamplen
-
-1. **Reprojektion:** *Raster → Projektionen → Reprojizieren*
-   - Quell-KS: ÍslandsDEM liefert ISN93/Lambert 1993 (EPSG:3057) oder
-     ähnliches — im Layer nachsehen.
-   - Ziel-KS: **EPSG:3057 (ISN93 / Lambert 1993)** beibehalten ist am
-     einfachsten (Metrisch, quasi-ebener für Island-Größenordnungen).
-     Ein Web-Mercator-Ziel (EPSG:3857) ist **ungeeignet** (Höhen-/Flächen-
-     verzerrung).
-2. **Downsamplen:** *Raster → Konversion → Übersetzen (Puffer speichern)*
-   (GDAL-Translate) mit `-tr 50 50` für 50-m-Auflösung und
-   `-r average` als Resampling-Methode.
-
-## Schritt 3: Export als 16-Bit-Graustufen-Heightmap
-
-1. *Raster → Konversion → Übersetzen*:
-   - Ausgabetyp: **UInt16**
-   - Rescaling: Höhenwerte auf 16-Bit-Bereich mappen. Beispiel für eine
-     Region mit min 0 m / max 1500 m:
-     `gdal_translate -ot UInt16 -scale 0 1500 0 65535 input.tif heightmap.png`
-     (Min/Max vorher über *Eigenschaften → Histogramm/Information* ermitteln
-     und **notieren** — die Werte werden in Unity wieder zurücksiskaliert.)
-2. Format: **PNG (16-Bit-Graustufen)** oder **RAW**.
-   - PNG: einfacher Handling, max. 65535 Stufen.
-   - RAW: mit 8-Bit-Header-Byte-Größe gemäß Unity-Konvention aufpassen —
-     für Windows-Byteordnung (Little Endian) exportieren.
-3. Notierte Metadaten neben die Datei als Textdatei legen, z. B.
-   `heightmap_meta.txt`:
-
-   ```
-   minHoehe_m: 0
-   maxHoehe_m: 1500
-   aufloesung_m: 50
-   breite_px: 1000
-   hoehe_px: 1000
-   CRS: EPSG:3057
-   ```
-
-## Schritt 4: Import in Unity
-
-1. Heightmap (PNG/RAW) + Metadatendatei in `game/Assets/_Project/Terrain/`
-   (oder beliebig unter `Assets/`) ablegen.
-2. Unity Editor: Menü **Terrain → Heightmap Importer** öffnen
-   (`Project.Terrain.Editor.HeightmapImporter`).
-3. Parameter setzen:
-   - Heightmap-Datei
-   - Terrain-Größe in Metern (X/Z, z. B. 50000 × 50000 für 50 km) und
-     Höhenskala (Y, aus `maxHoehe_m`)
-   - Auflösung
-4. **Import** klicken → erzeugt/überschreibt ein Unity-`Terrain`-Objekt
-   mit den Höhendaten.
-
-## Testdaten (ohne echtes DEM)
-
-Für automatische Tests wird **kein** echtes Island-DEM benötigt (Lizenz-
-Beschaffung bleibt manueller Nutzer-Schritt). Der Test generiert eine
-prozedurale 512 × 512-Heightmap und prüft die Terrain-Dimensionen —
-siehe `Project.Tests.EditMode.HeightmapImporterTests`.
-
-## Zusammenfassung der Pipeline
+## Data flow
 
 ```
-ÍslandsDEM (GeoTIFF, EPSG:3057)
-  → QGIS: Region zuschneiden
-  → QGIS: -tr 50 50 -r average (downsamplen)
-  → gdal_translate: -ot UInt16 -scale <min> <max> 0 65535
-  → heightmap.png (16-Bit Graustufen) + heightmap_meta.txt
-  → Unity: HeightmapImporter (Editor-Fenster) → Terrain-Objekt
+Copernicus GLO-30 COG tiles (AWS S3, public)
+  → tools/terrain/fetch_tiles.py        (download into gitignored terrain-cache/)
+  → tools/terrain/process_dem.py        (mosaic → warp EPSG:3057 → crop 2^n+1 → UInt16 encode)
+  → Assets/StreamingAssets/Terrain/     (*.raw canonical, *.png inspection, *_metadata.json)
+  → (M4) HeightmapImporter reads RAW + metadata JSON → Unity Terrain
 ```
+
+Both scripts resolve paths relative to the repo root; run them from anywhere.
+
+## 1. Fetch source tiles
+
+```bash
+python tools/terrain/fetch_tiles.py                      # Iceland N63-66 / W13-25 (default)
+python tools/terrain/fetch_tiles.py --bbox 63 66 13 25   # explicit integer-degree bbox
+```
+
+Tiles land in `terrain-cache/Iceland_Tiles/` (gitignored — 411 MB for full Iceland, regenerable). Existing valid tiles are skipped; `--force` re-downloads.
+
+## 2. Process into a heightmap
+
+```bash
+python tools/terrain/process_dem.py --region southwest            # named region table
+python tools/terrain/process_dem.py --lat 64.256 --lon -21.13     # custom center
+python tools/terrain/process_dem.py --region central --size 1025  # smaller map
+```
+
+Steps performed: tile preselection by intersection → coverage check (fails loudly if the window exceeds cached tiles; no silent map shifting) → mosaic → warp to EPSG:3057 (ISN93 / Lambert 1993) at `--resolution` (default 50 m) → crop of `--size` (default 2049 = 2¹¹+1) pixels square around the region center → UInt16 encoding.
+
+Outputs in `Assets/StreamingAssets/Terrain/`:
+
+| File | Purpose |
+|---|---|
+| `<region>_heightmap_<res>m_<size>x<size>.raw` | **Canonical** import source: UInt16 little-endian, exactly `size² × 2` bytes |
+| `<region>_heightmap_<res>m_<size>x<size>.png` (+ `.aux.xml`) | 16-bit grayscale copy for human/GIS inspection |
+| `<region>_metadata.json` | Region, CRS, bounds (EPSG:3057), scale/offset, height range, sea fraction, tile list — consumed by the M4 importer |
+
+## 3. Vertical encoding convention (binding for importers)
+
+```
+raw_value = clip(height_m * 10 + 10000, 0, 65535)
+height_m  = (raw_value - 10000) / 10
+10000     = sea level
+0         = source nodata only (GLO-30 ocean arrives as true 0.0 m → encodes to 10000)
+```
+
+The PNG is encoded identically; the 16-bit precision is preserved in both. Note the predecessor project's importer read PNGs through Unity's 8-bit red channel — that lossy path must not be used; import from RAW (M4).
+
+## 4. Upgrade path: ÍslandsDEM (10 m)
+
+The current source is Copernicus GLO-30 (30 m). The concept doc (section 12.1) prefers **ÍslandsDEM v1.0** (10 m, partially 2 m; Landmælingar Íslands + PGC, CC BY 4.0, <https://dem.lmi.is/mapview/>). Because `process_dem.py` takes any raster tile directory, the upgrade is: fetch ÍslandsDEM GeoTIFFs into a cache folder, point `--tiles-dir` at it, reprocess. Required credit either way — game credits must carry:
+
+> Map data: Landmælingar Íslands (ÍslandsDEM v1.0), CC BY 4.0
+
+or for the current source:
+
+> Copernicus DEM — GLO-30: contains modified Copernicus data
