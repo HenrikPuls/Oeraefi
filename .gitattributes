@@ -172,3 +172,8 @@ LightingData.asset     binary
 
 # Terrain heightmaps - raw binary elevation grids (see ADR-005)
 *.raw                   lfs
+
+# Generated terrain assets - large derived/regenerable data (M4):
+# TerrainData heightmap blob + resource-layer density grids.
+Assets/Terrain/**/*.asset           lfs
+Assets/Data/Terrain/**/*.asset      lfs
