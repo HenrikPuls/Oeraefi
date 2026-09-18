@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4265584966ca0054a9ba9f7ecb481616, type: 3}
+  m_Name: loeffel
+  m_EditorClassIdentifier: Oerfi.Runtime::Oerfi.Economy.Good
+  _id: loeffel
+  _displayName: "L\xF6ffel"
+  _category: 2
+  _kugildiValue: 0.01
+  _perishable: 0
+  _spoilageRatePerDay: 0
