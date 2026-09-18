@@ -10,7 +10,7 @@ Updated at the end of each session (or before a significant pause). Keep short �
 ## Intentionally deferred / open threads
 
 - **Predecessor dir `E:\projects\game\oerfi` may be deleted now** (all valuable data transferred in M1).
-- No git remote configured — push impossible; remote must be LFS-capable.
+- Remote `origin` = `git@github.com:HenrikPuls/Oeraefi.git` (SSH, Ed25519 key generated 2026-09-18, LFS-capable — heightmap pushed).
 - Optional package diet still undecided (`ai.assistant`, `visualscripting`, …).
 - Two-tier simulation parameters (batch factor, distance threshold) are code constants for now — SO-ification deferred to M13.
 - Calendar/attribute/skill/stage display names are German game content — UI surfacing comes with M5.
