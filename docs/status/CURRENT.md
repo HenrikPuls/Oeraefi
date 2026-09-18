@@ -2,10 +2,10 @@
 
 Updated at the end of each session (or before a significant pause). Keep short — running note, not a log.
 
-## State (2026-09-18, M2 session)
+## State (2026-09-18, M3 session)
 
-- **M0 + M1 committed** (through `b943b84`): verification gate, DEM pipeline + southwest heightmap (LFS), predecessor history archive.
-- **M2 implemented (pending gate + commit approval):** Core migrated (`Season`, `ITickable`, `CalendarModel` — pure C#, 364-day year, Aukanœtr 4 days, Sumarauki leap week every 6th year per user decision; no MonoBehaviour singleton anymore). Economy migrated with English API (`Good` + runtime-only factory, `PricingConfig` SO, `PricingEngine`, `FarmEconomyAgent` with priority-sorted consumption, two-tier detail levels). `GoodAssetGenerator` rebuilt to actually write values (predecessor's assets were empty shells): creates with concept-table values, verifies existing ones and warns on drift without overwriting user balancing. Tests ported + extended (calendar 10, economy 9 + asset-table guard 2). arc42 §5/§6 updated.
+- **M0–M2 committed** (through `8acf168`): verification gate, DEM pipeline + southwest heightmap, predecessor history archive, Core (calendar) + Economy (goods/pricing/agent/two-tier).
+- **M3 implemented (pending gate-final + commit approval):** Characters migrated (`AttributeId`/`Attributes` named-field struct, `SkillId`, `Origin`/`OriginProfile` with Unity-serializable named fields replacing the predecessor's silently-lossy `int[][]`, `SkillGrowthConfig` SO, `SkillSystem` with defensive `GetAll` copy, `CheckResolver` 2d10 + documented inclusive `IRandomSource` bounds, `Character`/`CharacterFactory`) and Household migrated (`ConcealedScalar` with a single value field — fixes the predecessor's unrest field-shadowing bug, `MoralValue`, `VitalityValue`, `UnrestSystem`, `ClothingVitalityLink`, `ThrallSupplyNeed` with 364-day clothing rate and season-as-parameter, `HouseholdGoodsStock`, `ManumissionService`). Origin/skill-growth assets generated (`CharacterAssetGenerator`, 4 origins + config, verified against concept 11.6 by table test). Tests: 62 EditMode (was 23) + 2 PlayMode green, 0 warnings, format clean.
 
 ## Intentionally deferred / open threads
 
@@ -13,9 +13,13 @@ Updated at the end of each session (or before a significant pause). Keep short �
 - No git remote configured — push impossible; remote must be LFS-capable.
 - Optional package diet still undecided (`ai.assistant`, `visualscripting`, …).
 - Two-tier simulation parameters (batch factor, distance threshold) are code constants for now — SO-ification deferred to M13.
-- Calendar month identifiers are ASCII-safe in code; proper Icelandic display names must be used in UI (M3/M5).
-- M3 next: Characters + Household migration (attributes/origins/skills/2d10, thrall supply, concealed values, vitality).
+- Calendar/attribute/skill/stage display names are German game content — UI surfacing comes with M5.
+- 2W10 checks have no difficulty modifiers or criticals (concept 11.4 defines none) — revisit at M14 (combat).
+- Unrest accumulation rates (which systems raise/lower unrest per tick) land with M4 AI (predecessor: −0.1/tick passive recovery).
+- `HouseholdGoodsStock` stays quantity-based, uncoupled from Economy `Good` (as predecessor; revisit M13).
+- Attribute↔skill coupling happens at call sites (`Resolve(attribute, skill)`); no mapping table modeled.
+- Batchmode runs add `SENTIS_ANALYTICS_ENABLED` to ProjectSettings scripting defines (package noise) — reverted before each commit; recurs on every editor/batchmode session.
 
 ## Next step
 
-Verify M2 (dotnet format, gate All), present summary, execute the 4 planned commits, then **M3 (Characters + Household migration)** in a fresh plan-mode session.
+Present M3 summary → explicit approval → 4 commits, then **M4 (AI + Terrain: `TaskAssignment`, `AutonomousWorker`, `PriorityOverride`, `HeightmapImporter`, `TerrainResourceLayer`, `ForestRegenerationTick`)** in a fresh plan-mode session.
