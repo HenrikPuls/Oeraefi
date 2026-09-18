@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cc1aa4472a5d424e9f8306c7610fe79, type: 3}
+  m_Name: FaroeseShetland
+  m_EditorClassIdentifier: Oerfi.Runtime::Oerfi.Characters.OriginProfile
+  _origin: 2
+  _displayName: "F\xE4r\xF6isch/Shetland-Herkunft"
+  _strengthDelta: 0
+  _dexterityDelta: 0
+  _toughnessDelta: 1
+  _perceptionDelta: 1
+  _witsDelta: 0
+  _willpowerDelta: 0
+  _farmingStart: 1
+  _animalHusbandryStart: 2
+  _smithingStart: 0
+  _weavingStart: 1
+  _woodworkingStart: 1
+  _stonemasonryStart: 2
+  _leatherworkingStart: 2
+  _cooperingStart: 1
+  _fishingStart: 4
+  _fowlingStart: 4
+  _sealHuntingStart: 3
+  _coastalSailingStart: 4
+  _helmsmanshipStart: 2
+  _tradingStart: 1
+  _combatStart: 1
+  _thingOratoryStart: 1

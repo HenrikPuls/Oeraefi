@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cc1aa4472a5d424e9f8306c7610fe79, type: 3}
+  m_Name: HebrideanGael
+  m_EditorClassIdentifier: Oerfi.Runtime::Oerfi.Characters.OriginProfile
+  _origin: 1
+  _displayName: "Hebridisch-g\xE4lischer Siedler (Vestma\xF0r)"
+  _strengthDelta: 0
+  _dexterityDelta: 1
+  _toughnessDelta: 0
+  _perceptionDelta: 1
+  _witsDelta: 0
+  _willpowerDelta: 0
+  _farmingStart: 2
+  _animalHusbandryStart: 2
+  _smithingStart: 1
+  _weavingStart: 3
+  _woodworkingStart: 1
+  _stonemasonryStart: 4
+  _leatherworkingStart: 1
+  _cooperingStart: 1
+  _fishingStart: 3
+  _fowlingStart: 3
+  _sealHuntingStart: 2
+  _coastalSailingStart: 2
+  _helmsmanshipStart: 1
+  _tradingStart: 1
+  _combatStart: 2
+  _thingOratoryStart: 1
