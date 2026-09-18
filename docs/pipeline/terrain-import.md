@@ -1,6 +1,6 @@
 # Terrain Pipeline: DEM → Unity Heightmap
 
-Scripted pipeline that turns public Copernicus GLO-30 elevation tiles into the heightmap consumed by the Unity `HeightmapImporter` (built in milestone M4). No QGIS or manual GIS steps required. See **ADR-005** for the decision record and credit lines.
+Scripted pipeline that turns public Copernicus GLO-30 elevation tiles into the heightmap consumed by the Unity importer (implemented since M4). No QGIS or manual GIS steps required. See **ADR-005** for the decision record and credit lines.
 
 ## Data flow
 
@@ -9,10 +9,18 @@ Copernicus GLO-30 COG tiles (AWS S3, public)
   → tools/terrain/fetch_tiles.py        (download into gitignored terrain-cache/)
   → tools/terrain/process_dem.py        (mosaic → warp EPSG:3057 → crop 2^n+1 → UInt16 encode)
   → Assets/StreamingAssets/Terrain/     (*.raw canonical, *.png inspection, *_metadata.json)
-  → (M4) HeightmapImporter reads RAW + metadata JSON → Unity Terrain
+  → Oerfi.Editor.Terrain importer reads RAW + metadata JSON → Unity Terrain
 ```
 
 Both scripts resolve paths relative to the repo root; run them from anywhere.
+
+Unity-side import (M4):
+
+- **Menu:** `Oerfi/Terrain/Import Southwest Heightmap`, `Oerfi/Terrain/Generate Southwest Resource Layer`, plus the general `Oerfi/Terrain/Heightmap Importer` window (any region).
+- **Batchmode:**
+  `Unity.exe -batchmode -projectPath . -executeMethod Oerfi.Editor.Terrain.HeightmapBatchmode.ImportSouthwest -quit -logFile …`
+  (analog: `Oerfi.Editor.Terrain.TerrainResourceLayerGenerator.GenerateSouthwest`).
+- **Outputs:** `Assets/Terrain/<Region>TerrainData.asset` (derived data — re-import updates in place) and `Assets/Data/Terrain/<Region>TerrainResourceLayer.asset` (balancing-bearing — created once, never overwritten by the generator; delete to regenerate). Both are git-LFS-tracked.
 
 ## 1. Fetch source tiles
 
@@ -39,7 +47,7 @@ Outputs in `Assets/StreamingAssets/Terrain/`:
 |---|---|
 | `<region>_heightmap_<res>m_<size>x<size>.raw` | **Canonical** import source: UInt16 little-endian, exactly `size² × 2` bytes |
 | `<region>_heightmap_<res>m_<size>x<size>.png` (+ `.aux.xml`) | 16-bit grayscale copy for human/GIS inspection |
-| `<region>_metadata.json` | Region, CRS, bounds (EPSG:3057), scale/offset, height range, sea fraction, tile list — consumed by the M4 importer |
+| `<region>_metadata.json` | Region, CRS, bounds (EPSG:3057), scale/offset, height range, sea fraction, tile list — consumed by the importer (`Oerfi.Terrain.TerrainMetadata`) |
 
 ## 3. Vertical encoding convention (binding for importers)
 
@@ -50,7 +58,7 @@ height_m  = (raw_value - 10000) / 10
 0         = source nodata only (GLO-30 ocean arrives as true 0.0 m → encodes to 10000)
 ```
 
-The PNG is encoded identically; the 16-bit precision is preserved in both. Note the predecessor project's importer read PNGs through Unity's 8-bit red channel — that lossy path must not be used; import from RAW (M4).
+The PNG is encoded identically; the 16-bit precision is preserved in both. Note the predecessor project's importer read PNGs through Unity's 8-bit red channel — that lossy path must not be used; import from RAW only.
 
 ## 4. Upgrade path: ÍslandsDEM (10 m)
 
